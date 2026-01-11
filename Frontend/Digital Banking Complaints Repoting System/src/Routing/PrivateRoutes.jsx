@@ -3,12 +3,21 @@ import { Navigate, Outlet } from 'react-router-dom'
 
 const PrivateRoutes = () => {
 
-    // console.log(!!localStorage.getItem("token"));
+    const persistAuth = localStorage.getItem("persist:auth");
+    let token = null;
 
+    if (persistAuth) {
+        try {
+            const authObj = JSON.parse(persistAuth);
+            if (authObj.token) {
+                token = JSON.parse(authObj.token);
+            }
+        } catch (err) {
+            console.error("Token parse error", err);
+        }
+    }
 
-    return (
-        localStorage.getItem("token") ? <Outlet /> : <Navigate to={"/"} />
-    )
+    return token ? <Outlet /> : <Navigate to="/" replace />;
 }
 
 export default PrivateRoutes

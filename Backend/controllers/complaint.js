@@ -1,18 +1,23 @@
-import { deleteFromCloudinary } from "../config/cloudinary.js";
+import { cloudinaryUploader } from "../config/cloudinary.js";
 import ComplaintModel from "../Models/complaintSchema.js";
+import UserModel from "../Models/userSchema.js";
+import fs from "fs/promises";
+
+// import { deleteFromCloudinary } from "../config/cloudinary.js";
 
 export const GenerateComplaint = async (req, res) => {
-
-    // const uploadedEvidence = req.session.uploadedEvidence || [];
-
+    let uploadedFiles = [];
 
     try {
+
+        // console.log("BODY:", req.body);
+        // console.log("FILES:", req.files)
         const user = req.user;
+        const files = req.files;
         const { complaintType, category, description, priority, uploadedEvidence } = req.body;
 
-        console.log(complaintType, category, description, priority, uploadedEvidence);
 
-
+        // Validation
         if (!complaintType || !category || !description || !priority) {
             return res.status(400).json({
                 message: "All required fields must be filled",
@@ -20,33 +25,67 @@ export const GenerateComplaint = async (req, res) => {
             });
         }
 
-        await ComplaintModel.create({
+        // if (!files || files.length === 0) {
+        //     return res.status(400).json({
+        //         message: "No files uploaded",
+        //         data: null,
+        //     });
+        // }
+
+
+        for (const file of files) {
+            const uploaded = await cloudinaryUploader.upload(file.path);
+            uploadedFiles.push({
+                url: uploaded.secure_url,
+                public_id: uploaded.public_id
+            });
+
+        }
+
+        // delete uploads folder
+        await fs.rm("./uploads", { recursive: true, force: true });
+
+        const userBankId = await UserModel.findById(user._id).select("bankId").lean();
+        // console.log("User Bank ID:", userBankId.bankId);
+
+        if (!userBankId || !userBankId.bankId) {
+            return res.status(400).json({
+                message: "User bankId not found",
+                status: false
+            });
+        }
+
+        // Create complaint
+        const complaint = await ComplaintModel.create({
             complaintType,
             category,
             description,
             priority,
-            uploadedEvidence,
-            createdBy: user._id
+            uploadedEvidence: uploadedFiles,
+            createdBy: user._id,
+            bankId: userBankId.bankId
         });
-
-        // req.session.uploadedEvidence = [];
 
         res.status(201).json({
             message: "Complaint Generated Successfully!",
             status: true,
+            data: complaint
         });
 
     } catch (error) {
 
-        if (uploadedEvidence.length > 0) {
-            await Promise.all(
-                uploadedEvidence.map(file =>
-                    deleteFromCloudinary(file.public_id)
-                )
-            );
+        // CLEANUP: delete uploaded images from Cloudinary
+        if (uploadedFiles?.length) {
+            for (const file of uploadedFiles) {
+                try {
+                    await cloudinaryUploader.destroy(file.public_id);
+                } catch (err) {
+                    console.error("Failed to delete from cloudinary:", err);
+                }
+            }
         }
 
-
+        // console.error("Error creating complaint:", error);
         res.status(500).json({
             message: error.message,
             status: false,

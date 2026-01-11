@@ -15,8 +15,10 @@ const bankSlice = createSlice({
                 state.loading = true;
             })
             .addCase(bankThunk.fulfilled, (state, action) => {
+                // console.log(action.payload);
+
                 state.loading = false;
-                state.banks = action.payload;
+                state.banks = action?.payload?.data
             })
             .addCase(bankThunk.rejected, (state, action) => {
                 state.loading = false;

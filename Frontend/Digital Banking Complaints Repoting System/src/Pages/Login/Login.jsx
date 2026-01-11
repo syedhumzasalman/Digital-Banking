@@ -22,20 +22,26 @@ const Login = () => {
       // console.log(response);
 
       if (response.message === "user successfully login!") {
-        
+
         if (response.data.isVerify === false) {
           navigate("/verifiOTP", {
             state: { email: data.email },
           });
           return;
         }
-        
-        if (response.token) {
-          localStorage.setItem("token", response.token);
-          localStorage.setItem("role", response.data.role);
-        }
 
-        
+        // if (response.token) {
+        //   localStorage.setItem("token", response.token);
+        //   localStorage.setItem("role", response.data.role);
+        //   // localStorage.setItem("fullname", response.data.fullname);
+        //   // localStorage.setItem("_id", response.data._id);
+        //   // localStorage.setItem("email", response.data.email);
+        //   // localStorage.setItem("bankId", response.data.bankId);
+        //   // localStorage.setItem("createdAt", response.data.createdAt);
+        //   // localStorage.setItem("updatedAt", response.data.updatedAt);
+        // }
+
+
         Swal.fire({
           icon: "success",
           title: "Login Successful 🎉",

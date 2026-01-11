@@ -110,9 +110,7 @@ export const LoginController = async (request, response) => {
     // console.log("userExist", userExist);
 
     delete userExist["password"];
-    const token = jwt.sign({ _id: userExist._id }, process.env.JWT_KEY, {
-      expiresIn: "24h",
-    });
+    const token = jwt.sign({ _id: userExist._id }, process.env.JWT_KEY);
 
     return response.status(201).json({
       message: "user successfully login!",

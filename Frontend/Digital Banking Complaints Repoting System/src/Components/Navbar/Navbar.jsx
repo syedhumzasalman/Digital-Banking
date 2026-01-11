@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { persistor } from "../../Store";
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -19,9 +20,8 @@ const Navbar = () => {
             : "text-gray-600 hover:bg-indigo-100";
 
     const handleLogout = () => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("role");
-        navigate("/login"); 
+        persistor.purge();
+        navigate("/login");
     };
 
     return (

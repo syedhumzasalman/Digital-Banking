@@ -11,7 +11,7 @@ const authSlice = createSlice({
     },
     reducers: {},
     extraReducers: (builder) => {
-        // Login Thunk
+        // Signup Thunk
         builder.addCase(signupThunk.pending, (state, { payload }) => {
             state.loading = true;
         });

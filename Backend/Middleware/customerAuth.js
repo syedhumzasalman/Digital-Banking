@@ -3,9 +3,11 @@ import UserModel from "../Models/userSchema.js";
 
 
 export const customerAuth = async (req, res, next) => {
+    // console.log("token", req.headers);
     try {
         const token = req.headers.authorization.split(" ")[1];
         const isVerify = jwt.verify(token, process.env.JWT_KEY);
+        // console.log("isVerify", isVerify);
         if (!isVerify) {
             return res.status(401).json({
                 message: "UnAuth user",
@@ -33,8 +35,8 @@ export const customerAuth = async (req, res, next) => {
 
         // console.log("isVerify", user);
     } catch (error) {
-        return res.status(401).json({
-            message: "UnAuth user",
+        return res.status(500).json({
+            message: error.message,
             status: false,
         });
     }
